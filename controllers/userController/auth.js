@@ -26,11 +26,15 @@ exports.signup = async (req, res, next) => {
         return res.status(500).json("server error"); 
     }; 
 
+    let date = new Date();
+
     const createdUser = new User({
         email: email, 
         username: username,
         password: hashPassword,
-        OTP: "hdgswg"  
+        image: [],
+        OTP: "hdgswg",
+        date: date.toDateString()
     });
 
     let token;
@@ -57,7 +61,8 @@ exports.signup = async (req, res, next) => {
 
     if(!saveUser) return res.status(500).json("Failed to create user")
 
-    res.status(200).json({email: saveUser.email, id: saveUser._id, username: saveUser.username, token: token});
+    res.status(200).json({email: saveUser.email, id: saveUser._id,
+         username: saveUser.username, token: token, image: saveUser.image});
 };
 
 exports.login = async (req, res, next) => {
@@ -99,6 +104,6 @@ exports.login = async (req, res, next) => {
     };
 
     return res.status(200).json({
-        email: existEmail.email, id: existEmail._id, username: existEmail.username, token: token});
-        // token, email, username
+        email: existEmail.email, id: existEmail._id, 
+        username: existEmail.username, token: token, image: existEmail.image});
 };

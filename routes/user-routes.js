@@ -10,6 +10,7 @@ router.post("/authentication", userController.login);  //passed done with this R
 
 router.post("/signup", userController.signup);  //passed done with this REST API 
 
+//routes to edit user information and delete user account permanently.
 
 //reset pass logic below
 router.post("/resetPassword/getCode", resetPasswordController.getCode);  // is a put() not a post request change later
