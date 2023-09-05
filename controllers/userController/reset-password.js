@@ -6,9 +6,10 @@ const { startSession } = require("mongoose");
 
 let storedEmail = {};
 
-exports.getCode = async (req, res, next) => {
+exports.getCode = async (req, res) => {
     const { email } = req.body;
 
+    console.log("email received", email)
     if(email.trim().length < 6) {
         return res.status(422).json("Enter a valid email");
     };
@@ -19,6 +20,8 @@ exports.getCode = async (req, res, next) => {
     } catch (err) {
         return res.status(500).json("Server error");
     };
+
+    console.log("email-exist", emailExist);
 
     if(!emailExist) {
         return res.status(404).json("email doesn't exist");
@@ -44,10 +47,17 @@ exports.getCode = async (req, res, next) => {
     // console.log("generate code and", codeGenerator);
 
     // console.log(emailExist);
+    console.log("code generated", emailExist);
 
+
+    // let sess;
     try {
+        // const sess = await startSession();
+        // sess.startTransaction();
         await emailExist.save();
+        // await sess.commitTransaction();
     } catch(err) {
+        // await sess.abortTransaction();
         return res.status(500).json("Failed to get code, try again");
     }
 
@@ -60,7 +70,7 @@ exports.getCode = async (req, res, next) => {
  
     // next();
     // console.log(req);
-    res.status(200).json(emailExist);
+    res.status(200).json("success");
     // return res.status(200).json(`Enter the 6 digits code sent to your email ${emailExist.email}`); 
 };
 

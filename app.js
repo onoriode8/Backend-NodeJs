@@ -22,9 +22,9 @@ server.use((req, res, next) => {
 
 server.use(userRoutes); 
 
-server.use(adminRoutes) // work on the connection later with the routes and controller and admin model
+server.use("/admin", adminRoutes) // work on the connection later with the routes and controller and admin model
 
-server.use(errorController); 
+server.use(errorController);  
 
 
 // server.listen(PORT);
