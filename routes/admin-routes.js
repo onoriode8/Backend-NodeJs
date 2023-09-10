@@ -2,8 +2,8 @@ const express = require("express");
 const { body } = require('express-validator');
 const adminControllers = require("../controllers/adminController/admin-operation");
 const adminAuthentication = require("../controllers/adminController/admin-authentication");
-// const expressValidator = require("../middlewares/express-validator");
-const AdminSchema = require("../models/adminModel/adminSchema")
+const AdminSchema = require("../models/adminModel/adminSchema");
+const checkAuth = require("../middlewares/check-auth");
 
 const router = express.Router();
 
@@ -23,10 +23,15 @@ router.post("/signup", async (req, res) => {
 });
 
 //admin email to change password
-router.post("/email", body('email').isEmail().normalizeEmail(), adminAuthentication.userEmail)
+router.patch("/email", body('email').isEmail().normalizeEmail(), adminAuthentication.userEmail) // passed
+
+//add token verify middleware to check for expires token and valid token before changing password.
+router.use(checkAuth);
+
+router.post("/validateCode", 
+    body('password').isLength({ min: 6 }), adminAuthentication.passCode);
 
 router.patch('/change/:userId', adminAuthentication.adminResetPassword);
-
 
 router.get("/users", adminControllers.getUsers);
 
