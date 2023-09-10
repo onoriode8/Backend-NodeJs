@@ -1,4 +1,5 @@
 const express = require("express");
+const { body } = require("express-validator")
 
 const userController = require("../controllers/userController/auth");
 const resetPasswordController = require("../controllers/userController/reset-password");
@@ -6,9 +7,12 @@ const resetPasswordController = require("../controllers/userController/reset-pas
 
 const router = express.Router();
  
-router.post("/authentication", userController.login);  //passed done with this REST API 
+router.post("/authentication", body("email").isEmail().normalizeEmail(),
+body("password").isLength({ min: 6 }), userController.login);  //passed done with this REST API 
 
-router.post("/signup", userController.signup);  //passed done with this REST API 
+router.post("/signup", body("email").isEmail().normalizeEmail(),
+      body("password").isLength({ min: 6 }), 
+      body("username"), userController.signup);  //passed done with this REST API 
 
 //routes to edit user information and delete user account permanently.
 

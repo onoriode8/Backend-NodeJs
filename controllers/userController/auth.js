@@ -1,14 +1,15 @@
 const User = require("../../models/userModel/auth");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-// const otpGenerator = require("otp-generator");
+const { validationResult } = require("express-validator");
 const { startSession } = require("mongoose");
 
 // let storedEmail = {};
 exports.signup = async (req, res, next) => {
     const { email, username, password } = req.body;
 
-    if(email.trim().length < 5 && username.trim().length < 3 && password.trim().length < 6) {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
         return res.status(402).json("Please enter a valid credentials");
     }
 
@@ -19,9 +20,12 @@ exports.signup = async (req, res, next) => {
 
     if(existUser) return res.status(406).json(`user with ${existUser.email} already exist, try again`)
  
+    const hashedCode = "hdgswg";
+    let hashOTP;
     let hashPassword;
     try {
         hashPassword = await bcryptjs.hash(password, 12); 
+        hashOTP = await bcryptjs.hash(hashedCode, 12); 
     } catch(err) {
         return res.status(500).json("server error"); 
     }; 
@@ -33,14 +37,14 @@ exports.signup = async (req, res, next) => {
         username: username,
         password: hashPassword,
         image: [],
-        OTP: "hdgswg",
+        OTP: hashOTP,
         date: date.toDateString()
     });
 
     let token;
     try { 
         token = jwt.sign({ email, hashPassword, username }, 
-            process.env.SECRET_TOKEN, {expiresIn: 60 * 60} );
+            process.env.SECRET_TOKEN, {expiresIn: "1h"} );
         if(token === undefined) {
             throw new Error("failed to create web token");
         }
@@ -68,9 +72,10 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     const { email, password } = req.body;
 
-    if(email.trim().length < 5 && password.trim().length < 6) {
-        return res.status(403).json("Please enter valid data");
-    };
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+       return res.status(403).json("Please enter valid data");
+    }
 
     let existEmail;
     try {
@@ -98,7 +103,7 @@ exports.login = async (req, res, next) => {
     let token;
     try {
         token = jwt.sign({ userId: existEmail._id, email: existEmail.email},
-            process.env.SECRET_TOKEN, { expiresIn: 60 * 60 });
+            process.env.SECRET_TOKEN, { expiresIn: "1h" });
     } catch(err) {
         return res.status(500).json("Failed to create token");
     };

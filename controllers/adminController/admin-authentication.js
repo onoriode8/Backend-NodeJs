@@ -41,7 +41,7 @@ exports.adminLogin = async (req, res) => {
     try {
         token = jwt.sign({ email: admin.email, id: admin._id},
             process.env.SECRET_TOKEN,
-             { expiresIn: 60 * 60 })
+             { expiresIn: '1h' })
     } catch (err) {
         return res.status(403).json("Failed, try login again")
     }
@@ -127,7 +127,7 @@ exports.userEmail = async (req, res, next) => {
     let token;
     try {
         token = jwt.sign({ email: adminEmail.email, id: adminEmail._id}, 
-            process.env.SECRET_TOKEN, { expiresIn: 60 * 60 })
+            process.env.SECRET_TOKEN, { expiresIn: "1h" })
     } catch(err) { return res.status(500).json("Failed") }
 
     if(!token) {
@@ -147,7 +147,7 @@ exports.passCode = async (req, res, next) => {
         return res.status(400).json("Enter a valid password");
     };
 
-    console.log("line 150 token verify email sent", req.reqBody.email);
+    // console.log("line 150 token verify email sent", req.reqBody.email);
 
     let response;
     try {
@@ -162,7 +162,7 @@ exports.passCode = async (req, res, next) => {
 
     let hashedCode;
     try {
-        hashedCode = await bcrypt.compare(code, hashedCode.OTP)
+        hashedCode = await bcrypt.compare(code, response.OTP)
     } catch(err) {
         return res.status(400).json("Failed to compare codes, try again later");
     }
@@ -173,15 +173,58 @@ exports.passCode = async (req, res, next) => {
 
     response.password = undefined;
 
-    return res.status(200).json({ email: response.email, id: response._id });
+    let token;
+    try {
+        token = jwt.sign({ email: response.email, id: response._id}, 
+            process.env.SECRET_TOKEN, { expiresIn: "1h" })
+    } catch(err) { return res.status(500).json("Failed") }
+
+    return res.status(200).json({ email: response.email, id: response._id, token: token });
 
 }
 
-exports.adminResetPassword = (req, res, next) => {
-    // const {}
+exports.adminResetPassword = async (req, res, next) => {
+    const { password, confirmedPassword } = req.body;
+
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+        return res.status(422).json("Enter a valid password");
+    };
+
+    if(password !== confirmedPassword) {
+        return res.status(406).json("not acceptable, both password must match");
+    }
+
+    let response;
+    try {
+        response = await AdminSchema.findOne({ email: req.reqBody.email });
+    } catch(err) {
+        return res.status(500).json("server error");
+    }
+
+    if(!response) { return res.status(404).json("user not found") };
+
+    let hashedPassword;
+    try {
+        hashedPassword = await bcrypt.hash(password, 12);
+    } catch(err) {
+        return res.status(500).json("Failed to secure password, try again later");
+    };
+    // console.log("password line 213", hashedPassword)
+
+    if(hashedPassword === undefined || hashedPassword === null) {
+        return res.status(404).json("password can't be null");
+    }
+
+    response.password = hashedPassword;
+
+    try {
+        const data = await response.save();
+        if(!data) {
+            throw new Error("Failed to update password");
+        }
+        return res.status(200).json("password updated successful");
+    } catch(err) {
+        return res.status(500).json("server error");
+    };
 };
-
-
-
-
-
