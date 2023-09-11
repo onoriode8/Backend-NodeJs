@@ -26,13 +26,6 @@ server.use("/admin", adminRoutes) // work on the connection later with the route
 
 server.use(errorController);  
 
-
-// server.listen(PORT);
-
-// add new collection name testing and document name Mern to database.    aZ7Rudh2IiNhjifg
-
-// const url = 'mongodb+srv://testing:eU0Lcc5mA3JFCdQ1@cluster0.xhbwvcs.mongodb.net/Mern?retryWrites=true&w=majority';
-
 const url = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.xhbwvcs.mongodb.net/${process.env.COLLECTION}?retryWrites=true&w=majority`;
 
 mongoose.connect(url)
@@ -44,13 +37,3 @@ mongoose.connect(url)
     .catch(err => { 
         console.log("error occur"); 
     });
-
-// try {
-//     mongoose.connect(url).then(res => {
-//         server.listen(PORT, ()=> {
-//             console.log(`app is running on http://localhost:${PORT}/`);
-//         })
-//     })
-// } catch(err) {
-//     console.log("Error");
-// }
