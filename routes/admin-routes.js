@@ -2,7 +2,7 @@ const express = require("express");
 const { body } = require('express-validator');
 const adminControllers = require("../controllers/adminController/admin-operation");
 const adminAuthentication = require("../controllers/adminController/admin-authentication");
-const AdminSchema = require("../models/adminModel/adminSchema");
+// const AdminSchema = require("../models/adminModel/adminSchema");
 const checkAuth = require("../middlewares/check-auth");
 
 const router = express.Router();

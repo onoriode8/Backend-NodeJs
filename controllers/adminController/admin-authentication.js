@@ -17,7 +17,7 @@ exports.adminLogin = async (req, res) => {
 
     let admin;
     try {
-       admin = AdminSchema.findOne({email: email});
+       admin = await AdminSchema.findOne({email: email});
     } catch(err) {
         return res.status(500).json("server error");
     };
@@ -30,12 +30,17 @@ exports.adminLogin = async (req, res) => {
     try {
         comparePassword = await bcrypt.compare(password, admin.password);
     } catch (err) {
-        return res.status(500).json("Failed to login")
+        return res.status(500).json("Failed to login");
     }
+
+    // console.log("check check", admin)
     
     if(comparePassword === false) {
         return res.status(401).json("incorrect password")
     };
+
+    admin.password = undefined;
+    admin.OTP = undefined;
 
     let token;
     try {
@@ -45,6 +50,7 @@ exports.adminLogin = async (req, res) => {
     } catch (err) {
         return res.status(403).json("Failed, try login again")
     }
+
 
     return res.status(200).json({ token: token, email: admin.email, id: admin._id });
 };

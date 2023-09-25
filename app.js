@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
+const cors = require("cors")
 const userRoutes = require("./routes/user-routes");
 const errorController = require("./controllers/error");
 const adminRoutes = require("./routes/admin-routes");
@@ -15,10 +15,12 @@ server.use(express.json());
 
 server.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, PATCH, PUT, GET, DELETE");
+    res.setHeader("Access-Control-Allow-Methods", "POST, PATCH, GET, DELETE");
     res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
     next();
 }); 
+
+server.use(cors())
 
 server.use(userRoutes); 
 
