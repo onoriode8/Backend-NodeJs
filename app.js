@@ -26,7 +26,8 @@ server.use(userRoutes);
 
 server.use("/admin", adminRoutes) // work on the connection later with the routes and controller and admin model
 
-server.use(errorController);  
+// server.use(errorController); 
+server.use(userRoutes) 
 
 const url = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.xhbwvcs.mongodb.net/${process.env.COLLECTION}?retryWrites=true&w=majority`;
 
