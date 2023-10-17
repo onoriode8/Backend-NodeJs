@@ -26,17 +26,16 @@ server.use(userRoutes);
 
 server.use("/admin", adminRoutes) // work on the connection later with the routes and controller and admin model
 
-// server.use(errorController); 
-server.use(userRoutes) 
+server.use(errorController); 
 
 const url = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.xhbwvcs.mongodb.net/${process.env.COLLECTION}?retryWrites=true&w=majority`;
 
 mongoose.connect(url)
     .then(res => {
-        server.listen(PORT, () => {
-            console.log(`app is serving on http://localhost:${PORT}`);
+        server.listen(process.env.PORT, () => {
+            console.log(`app is serving on http://localhost:${process.env.PORT}`);
         })
     })
     .catch(err => { 
-        console.log("error occur"); 
+        // console.log("error occur"); 
     });
