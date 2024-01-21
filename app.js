@@ -5,7 +5,7 @@ const userRoutes = require("./routes/user-routes");
 const errorController = require("./controllers/error");
 const adminRoutes = require("./routes/admin-routes");
 
-const PORT =  5000;
+// const PORT =  5000;
 
 
 const server = express();

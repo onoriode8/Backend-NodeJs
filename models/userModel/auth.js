@@ -6,7 +6,7 @@ const mongooseSchema = new mongoose.Schema({
     password: { type: String, required: true, trim: true },
     image: { type: [String], required: true },
     OTP: { type: String, required: true, trim: true },
-    date: { type: String, required: true }
+    signupDate: { type: String, required: true }
 });
 
 const userModel = mongoose.model("Users", mongooseSchema);

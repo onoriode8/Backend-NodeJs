@@ -1,8 +1,9 @@
 const User = require("../../models/userModel/auth");
 const bcryptjs = require("bcryptjs");
-// const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const otpGenerator = require("otp-generator");
 const { startSession } = require("mongoose");
+const nodeMailer = require('nodemailer')
 
 let storedEmail = {};
 
@@ -24,7 +25,7 @@ exports.getCode = async (req, res) => {
     console.log("email-exist", emailExist);
 
     if(!emailExist) {
-        return res.status(404).json("email doesn't exist");
+        return res.status(404).json("email doesn't exist, login instead");
     }
 
     // otp generator 
@@ -35,33 +36,50 @@ exports.getCode = async (req, res) => {
         return res.status(500).json("Try again later");
     };
 
-    //hash the codeGeneator code (OTP) before saving to DB
+    //send otp to user email or through sms to input to the frontend.
+    let mailTransporter = nodeMailer.createTransport({
+        service: process.env.GOOGLE_SERVICE,
+        auth: {
+            type: process.env.GOOGLE_CLOUD_OAUTH,
+            user: process.env.GOOGLE_CLOUD_USER,
+            pass: process.env.GOOGLE_CLOUD_PASSWORD,
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SCECRET,
+            refreshToken: process.env.REFRESH_TOKEN
+        }
+    })
 
-    emailExist.OTP = codeGenerator
+    let mailOptions = {
+        from: process.env.GOOGLE_CLOUD_USER,
+        to: emailExist.email,
+        subject: '(OSB) onlineshop',
+        text: 
+        `Hi ${emailExist.email}. We detect someone trying to login into your account, ignore if this is you. Your 6 digit OTP code
+         ${codeGenerator}`
+      };
 
-    // const saveOtp = new User({
-    //     OTP: codeGenerator
-    // });
+      await mailTransporter.sendMail(mailOptions, function(err, data) {
+        if (err) {
+           return res.status(502).json(err);
+        } 
+      });
 
-    // const data = await saveOtp.save();
-    // console.log("generate code and", codeGenerator);
+    //hash the codeGenerator code (OTP) before saving to DB
+    let hashedOtp;
+    try {
+        hashedOtp = await bcryptjs.hash(codeGenerator, 12);
+    } catch(err) {
+        return res.status(500).json("Failed to get details")
+    }
 
-    // console.log(emailExist);
-    console.log("code generated", emailExist);
-
+    emailExist.OTP = hashedOtp
 
     // let sess;
     try {
-        // const sess = await startSession();
-        // sess.startTransaction();
         await emailExist.save();
-        // await sess.commitTransaction();
     } catch(err) {
-        // await sess.abortTransaction();
         return res.status(500).json("Failed to get code, try again");
     }
-
-    //send otp to user email or through sms to input to the frontend.
 
     const emailuser = req.userEmail = { email: emailExist.email }   // stored email in request for easily retriever 
     console.log("before", storedEmail);
